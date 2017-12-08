@@ -24,7 +24,7 @@ namespace Friends
                 app.UseDeveloperExceptionPage();
             }
 
-            InitializeDatabase(app);
+            InitializeDatabase(app, env);
             app.UseMvc();
         }
 
@@ -36,18 +36,29 @@ namespace Friends
             services.AddScoped<IFriendRepository, FriendRepository>();
         }
 
-        private void InitializeDatabase(IApplicationBuilder app)
+        private void InitializeDatabase(IApplicationBuilder app, IHostingEnvironment env)
         {
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<FriendDbContext>();
-                dbContext.Database.EnsureCreated();
 
-                var repository = serviceScope.ServiceProvider.GetRequiredService<IFriendRepository>();
+                if (!env.IsProduction())
+                {
+                    dbContext.Database.EnsureDeleted();
+                    dbContext.Database.EnsureCreated();
 
-                // seed data
-                repository.AddFriend(new Models.Friend { Name = "Noah", Email = "xxx.com", BirthDate = new System.DateTime(1990, 10, 10) });
-                repository.Save();
+                    // seed data
+                    var repository = serviceScope.ServiceProvider.GetRequiredService<IFriendRepository>();
+                    repository.AddFriend(new Models.Friend { Name = "Kailey", Email = "kailey@test.com", BirthDate = new System.DateTime(1991, 8, 13) });
+                    repository.AddFriend(new Models.Friend { Name = "Rad", Email = "rad@test.com", BirthDate = new System.DateTime(1992, 9, 07) });
+                    repository.AddFriend(new Models.Friend { Name = "Gale", Email = "gale@test.com", BirthDate = new System.DateTime(1993, 10, 5) });
+                    repository.AddFriend(new Models.Friend { Name = "Walter", Email = "walter@test.com", BirthDate = new System.DateTime(1994, 11, 24) });
+                    repository.Save();
+                }
+                else
+                {
+                    dbContext.Database.EnsureCreated();
+                }
             }
         }
     }
