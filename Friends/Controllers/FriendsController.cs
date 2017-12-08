@@ -1,5 +1,4 @@
-﻿using Friends.Models;
-using Friends.Services;
+﻿using Friends.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Friends.Controllers
@@ -18,6 +17,7 @@ namespace Friends.Controllers
         //{
         //}
 
+        [HttpGet]
         public IActionResult GetFriends()
         {
             return Ok(_friendRepository.GetFriends());
