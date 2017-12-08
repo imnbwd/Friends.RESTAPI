@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Friends.Data;
+using Friends.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Friends
 {
@@ -20,12 +16,6 @@ namespace Friends
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddMvc();
-        }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -34,7 +24,31 @@ namespace Friends
                 app.UseDeveloperExceptionPage();
             }
 
+            InitializeDatabase(app);
             app.UseMvc();
+        }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvc();
+            services.AddDbContext<FriendDbContext>();
+            services.AddScoped<IFriendRepository, FriendRepository>();
+        }
+
+        private void InitializeDatabase(IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var dbContext = serviceScope.ServiceProvider.GetRequiredService<FriendDbContext>();
+                dbContext.Database.EnsureCreated();
+
+                var repository = serviceScope.ServiceProvider.GetRequiredService<IFriendRepository>();
+
+                // seed data
+                repository.AddFriend(new Models.Friend { Name = "Noah", Email = "xxx.com", BirthDate = new System.DateTime(1990, 10, 10) });
+                repository.Save();
+            }
         }
     }
 }

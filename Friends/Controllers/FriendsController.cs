@@ -1,42 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using Friends.Models;
+using Friends.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Friends.Controllers
 {
-    [Produces("application/json")]
     [Route("api/Friends")]
     public class FriendsController : Controller
     {
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        private IFriendRepository _friendRepository;
+
+        public FriendsController(IFriendRepository friendRepository)
         {
+            _friendRepository = friendRepository;
         }
 
-        // GET: api/Friends
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        //public IActionResult AddFriend([FromBody] Friend friend)
+        //{
+        //}
 
-        // GET: api/Friends/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        public IActionResult GetFriends()
         {
-            return "value";
-        }
-
-        // POST: api/Friends
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
-
-        // PUT: api/Friends/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
+            return Ok(_friendRepository.GetFriends());
         }
     }
 }
